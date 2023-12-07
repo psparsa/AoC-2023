@@ -1,1 +1,1 @@
-![AOC-2023](https://github.com/psparsa/AoC-2023/assets/57572461/b5a57abb-6347-48f7-b5bb-a27f521e13e4)
+![AOC-2023](https://github.com/psparsa/AoC-2023/assets/57572461/15b34c5a-fb73-488a-86f4-b7fb4ca6ca4f)
