@@ -9,68 +9,77 @@ const input = `467..114..
 ...$.*....
 .664.598..`;
 
-const lines = input.split("\n");
+const rows = input.split("\n");
 
-const isSymbol = (char: string | undefined) =>
-  char === undefined ? false : !/^\d|\.$/.test(char);
+type NumberMetadata = {
+  startPosition: number;
+  endPosition: number;
+  numberValue: number;
+};
+const rowsNumbers: NumberMetadata[][] = rows.map((row) =>
+  Array.from(row.matchAll(/\d+/g), (match) => ({
+    startPosition: match.index!,
+    endPosition: match.index! + match[0].length - 1,
+    numberValue: parseInt(match[0], 10),
+  }))
+);
 
-var regex = /\d+/g;
+type SymbolMetadata = { position: number; symbolValue: string };
+const rowsSymbols: SymbolMetadata[][] = rows.map((row) =>
+  Array.from(row.matchAll(/[^0-9.]/g), (match) => ({
+    position: match.index!,
+    symbolValue: match[0],
+  }))
+);
 
-let total = 0;
-let matchedNumbers: number[] = [];
+const isInRange = (number: number) => (point1: number) => (point2: number) => {
+  const min = Math.min(point1, point2);
+  const max = Math.max(point1, point2);
 
-for (let i = 0; i < lines.length; ++i) {
-  const currentLine = lines[i];
+  return number >= min && number <= max;
+};
 
-  const matches = Array.from(currentLine.matchAll(regex), (match) => ({
-    start: match.index!,
-    end: match.index! + match[0].length - 1,
-    number: parseInt(match[0], 10),
-  }));
+const isPartNumber =
+  (number: NumberMetadata) => (symbols: SymbolMetadata[]) => {
+    return symbols.some((symbol) => {
+      const isAdjacentInCurrentLine =
+        symbol.position === number.startPosition - 1 ||
+        symbol.position === number.endPosition + 1;
 
-  for (let y = 0; y < matches.length; ++y) {
-    const { start, end, number } = matches[y];
+      const isAdjacentInAnotherLine = isInRange(symbol.position)(
+        number.startPosition - 1
+      )(number.endPosition + 1);
 
-    const left = currentLine[start - 1];
-    const right = currentLine[end + 1];
+      return isAdjacentInCurrentLine || isAdjacentInAnotherLine;
+    });
+  };
 
-    // Check left & right
-    if (isSymbol(left) || isSymbol(right)) {
-      // Found
-      total += number;
-      matchedNumbers.push(number);
-    } else {
-      let found = false;
-      // Check upper row
-      if (i > 0) {
-        for (let u = start - 1; u <= end + 1; ++u) {
-          const currentCell = lines[i - 1][u];
-          if (isSymbol(currentCell)) {
-            total += number;
-            matchedNumbers.push(number);
-            found = true;
-            break;
-          }
-        }
-      }
+const partNumbers = rowsNumbers.flatMap((row, rowIndex) => {
+  return row.filter((numberMetadata) => {
+    const isFirstRow = rowIndex === 0;
+    const isLastRow = rowIndex === rowsNumbers.length - 1;
 
-      if (found) continue;
+    const hasAnyAdjecentSymbolInPrevLine =
+      !isFirstRow && isPartNumber(numberMetadata)(rowsSymbols[rowIndex - 1]);
 
-      // Check bottom row
-      if (i !== lines.length - 1) {
-        console.log(number);
-        for (let u = start - 1; u <= end + 1; ++u) {
-          const currentCell = lines[i + 1][u];
-          if (isSymbol(currentCell)) {
-            total += number;
-            matchedNumbers.push(number);
-            break;
-          }
-        }
-      }
-    }
-  }
-}
+    const hasAnyAdjecentSymbolInCurrentLine = isPartNumber(numberMetadata)(
+      rowsSymbols[rowIndex]
+    );
+
+    const hasAnyAdjecentSymbolInNextLine =
+      !isLastRow && isPartNumber(numberMetadata)(rowsSymbols[rowIndex + 1]);
+
+    return (
+      hasAnyAdjecentSymbolInPrevLine ||
+      hasAnyAdjecentSymbolInCurrentLine ||
+      hasAnyAdjecentSymbolInNextLine
+    );
+  });
+});
+
+const result = partNumbers
+  .map(({ numberValue }) => numberValue)
+  .reduce((a, b) => a + b);
 
 // Answer: 4361
-console.log(total);
+console.log(result);
