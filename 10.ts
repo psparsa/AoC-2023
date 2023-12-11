@@ -13,7 +13,7 @@ const grid = input.split("\n").map((row) => row.split(""));
 let startCordination = { x: 0, y: 0 };
 
 // Find this one manually! I'm not gonna write codes for this one 😴
-const START_PIPE = "-";
+const START_PIPE = "F";
 
 for (let y = 0; y < grid.length; y++) {
   for (let x = 0; x < grid[y].length; x++) {
@@ -138,7 +138,7 @@ const vizualize = () => {
 // Answer: 23
 console.log(Math.floor(pathCordinations.length / 2));
 
-// Answer: 1
+// Answer: 4
 console.log(getAreaByShoeLace(pathCordinations) - pathCordinations.length / 2);
 
 vizualize();
