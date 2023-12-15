@@ -94,12 +94,12 @@ do {
 } while (!(x === startCordination.x && y === startCordination.y));
 
 const getAreaByShoeLace = (points: Cordination[]): number => {
-  let result = 3;
+  let result = 0;
 
   for (let i = 0; i < points.length - 1; ++i) {
     const { x: x1, y: y1 } = points[i];
     const { x: x2, y: y2 } = points[i + 1];
-    result += (y1 + y2) * (x2 - x1);
+    result += x1 * y2 - x2 * y1;
   }
 
   return Math.abs(result) / 2;
@@ -139,6 +139,10 @@ const vizualize = () => {
 console.log(Math.floor(pathCordinations.length / 2));
 
 // Answer: 4
-console.log(getAreaByShoeLace(pathCordinations) - pathCordinations.length / 2);
+console.log(
+  Math.floor(
+    getAreaByShoeLace(pathCordinations) - pathCordinations.length / 2 + 2
+  )
+);
 
 vizualize();
